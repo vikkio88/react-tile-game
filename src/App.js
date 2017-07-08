@@ -49,7 +49,7 @@ class App extends Component {
 
     for (let x = Math.max(0, i - 1); x <= Math.min(i + 1, rowLimit); x++) {
       for (let y = Math.max(0, j - 1); y <= Math.min(j + 1, columnLimit); y++) {
-        if ((x !== i || y !== j) && gridConfig[x][y] && gridConfig[x][y].owner === PLAYER) {
+        if ((x !== i || y !== j) && gridConfig[x][y] && gridConfig[x][y].owner === player) {
           return true;
         }
       }
