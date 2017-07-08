@@ -27,7 +27,11 @@ const gridConfig = [
 class App extends Component {
   state = {
     round: 1,
-    gridConfig: gridConfig
+    gridConfig: gridConfig,
+    tileCount: {
+      player: 1,
+      enemy: 1
+    }
   };
   componentDidMount() {
     const { gridConfig } = this.state;
@@ -42,7 +46,7 @@ class App extends Component {
     this.setState({ gridConfig });
   }
 
-  confiningWithPlayer(i, j, player = PLAYER) {
+  adjacentToPlayer(i, j, player = PLAYER) {
     const { gridConfig } = this.state;
     const rowLimit = gridConfig.length - 1;
     const columnLimit = gridConfig[0].length - 1;
@@ -69,7 +73,7 @@ class App extends Component {
       }
     }
 
-    if (this.confiningWithPlayer(r, c, player)) {
+    if (this.adjacentToPlayer(r, c, player)) {
       if (gridConfig[r][c] === 0) {
         const tile = player === PLAYER ? BASE_PLAYER_TILE : BASE_ENEMY_TILE;
         gridConfig[r][c] = {
@@ -78,44 +82,66 @@ class App extends Component {
       }
     }
 
-    return {
-      gridConfig
-    }
+    return gridConfig;
   }
 
   enemyMove(gridConfig) {
     const rows = gridConfig.length - 1;
     const cols = gridConfig[0].length - 1;
-    const enemyMoveResult = this.clickBox(gridConfig, rand(0, rows), rand(0, cols), ENEMY);
-    return {
-      gridConfig: enemyMoveResult.gridConfig
-    }
+    // moving randomly (cant be bothered of doing it yet)
+    return this.clickBox(
+      gridConfig,
+      rand(0, rows),
+      rand(0, cols),
+      ENEMY
+    );
   }
 
   onBoxClick(r, c) {
-    const { gridConfig, round } = this.state;
-    const playerMoveResult = this.clickBox(gridConfig, r, c, PLAYER);
-    const enemyMoveResult = this.enemyMove(playerMoveResult.gridConfig);
+    let { gridConfig, round } = this.state;
+    gridConfig = this.clickBox(gridConfig, r, c, PLAYER);
+    gridConfig = this.enemyMove(gridConfig);
+    const tileCount = this.countTiles(gridConfig);
 
+    round += 1;
     this.setState({
-      gridConfig: enemyMoveResult.gridConfig,
-      round: round + 1
+      gridConfig,
+      round,
+      tileCount
     });
   }
 
+  countTiles(gridConfig) {
+    let player = 0;
+    let enemy = 0;
+    gridConfig.forEach(row => {
+      row.forEach(col => {
+        if (col !== 0) {
+          col.owner === PLAYER ? player += 1 : enemy += 1
+        }
+      });
+    });
+
+    return {
+      player,
+      enemy
+    }
+  }
+
   render() {
-    const { gridConfig, round } = this.state;
+    const { gridConfig, round, tileCount } = this.state;
     const rows = gridConfig.length;
     const cols = gridConfig[0].length;
     return (
-      <div>
-        <div className="App">
+      <div className="App">
+        <h2>Rounds: {round}</h2>
+        <div className="gridContainer">
           <Grid cols={cols} rows={rows}
             gridConfig={gridConfig}
             onBoxClick={(r, c) => this.onBoxClick(r, c)}
           />
         </div>
-        <h2>Rounds: {round}</h2>
+        <h2>Player {tileCount.player} - {tileCount.enemy} Enemy</h2>
       </div>
     );
   }
