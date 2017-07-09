@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
-import { Grid } from './components';
+import { Grid, Overlay } from './components';
 import { rand } from './utils';
 
 const PLAYER = 1;
@@ -31,7 +31,8 @@ class App extends Component {
     tileCount: {
       player: 1,
       enemy: 1
-    }
+    },
+    gameOver: false
   };
   componentDidMount() {
     const { gridConfig } = this.state;
@@ -58,23 +59,22 @@ class App extends Component {
         }
       }
     }
-
+    console.log('not adjacent to ' + player)
     return false;
   }
 
   clickBox(gridConfig, r, c, player = PLAYER) {
-    console.log(player, r, c);
-    if (gridConfig[r][c] !== 0 && gridConfig[r][c].owner === player) {
-      gridConfig[r][c].health += 1;
-    } else if (gridConfig[r][c] !== 0 && gridConfig[r][c].owner !== player) {
-      gridConfig[r][c].health -= 1;
-      if (gridConfig[r][c].health === 0) {
-        gridConfig[r][c] = 0;
-      }
-    }
+    console.log(player === PLAYER ? 'player' : '"ai"', r, c);
 
     if (this.adjacentToPlayer(r, c, player)) {
-      if (gridConfig[r][c] === 0) {
+      if (gridConfig[r][c] !== 0 && gridConfig[r][c].owner === player) {
+        gridConfig[r][c].health += 1;
+      } else if (gridConfig[r][c] !== 0 && gridConfig[r][c].owner !== player) {
+        gridConfig[r][c].health -= 1;
+        if (gridConfig[r][c].health === 0) {
+          gridConfig[r][c] = 0;
+        }
+      } else if (gridConfig[r][c] === 0) {
         const tile = player === PLAYER ? BASE_PLAYER_TILE : BASE_ENEMY_TILE;
         gridConfig[r][c] = {
           ...tile
@@ -98,16 +98,23 @@ class App extends Component {
   }
 
   onBoxClick(r, c) {
-    let { gridConfig, round } = this.state;
+    let { gridConfig, round, gameOver } = this.state;
     gridConfig = this.clickBox(gridConfig, r, c, PLAYER);
     gridConfig = this.enemyMove(gridConfig);
     const tileCount = this.countTiles(gridConfig);
 
     round += 1;
+    if (tileCount.player === 0 || tileCount.enemy === 0) {
+      gameOver = {
+        winner: tileCount.player === 0 ? 'Enemy won' : 'Player won'
+      }
+    }
+
     this.setState({
       gridConfig,
       round,
-      tileCount
+      tileCount,
+      gameOver
     });
   }
 
@@ -129,12 +136,16 @@ class App extends Component {
   }
 
   render() {
-    const { gridConfig, round, tileCount } = this.state;
+    const { gridConfig, round, tileCount, gameOver } = this.state;
     const rows = gridConfig.length;
     const cols = gridConfig[0].length;
     return (
       <div className="App">
         <h2>Rounds: {round}</h2>
+        {
+          gameOver &&
+          <Overlay message={gameOver.winner} />
+        }
         <div className="gridContainer">
           <Grid cols={cols} rows={rows}
             gridConfig={gridConfig}

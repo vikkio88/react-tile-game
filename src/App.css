@@ -42,6 +42,32 @@
   color: black
 }
 
+.overlay {
+  position: fixed;
+  z-index: auto; 
+  top: 0px;
+  bottom: 0px; 
+  left: 0px;
+  right: 0px; 
+  background-color: rgb(0, 0, 0); 
+  opacity: 0.8;
+}
+
+.overlayMessage {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-content: center;
+  width: 200px; 
+  top: 30%; left: 50%; 
+  transform: translate(-57%, -55%); 
+  border: 1px solid rgb(229, 229, 229); 
+  background-color: white; 
+  box-shadow: rgba(0, 0, 0, 0.5) 0px 5px 15px;
+  padding: 20px;
+}
+
 .App-logo {
   animation: App-logo-spin infinite 20s linear;
   height: 80px;
