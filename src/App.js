@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
 import './App.css';
 import { Grid, Overlay } from './components';
-import { rand } from './utils';
+import { rand, range } from './utils';
 
+const COLS = 8;
+const ROWS = 8;
 const PLAYER = 1;
 const ENEMY = 2;
 const BASE_PLAYER_TILE = {
@@ -14,34 +16,27 @@ const BASE_ENEMY_TILE = {
   health: 1
 };
 
-const gridConfig = [
-  [0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0]
-];
+const getStartingGridConfig = () => range(COLS).map(() => range(ROWS).map(() => 0));
 
 class App extends Component {
   state = {
     round: 1,
-    gridConfig: gridConfig,
+    gridConfig: getStartingGridConfig(),
     tileCount: {
       player: 1,
       enemy: 1
     },
     gameOver: false
   };
+
   componentDidMount() {
     const { gridConfig } = this.state;
-    const rows = gridConfig.length - 1;
-    const cols = gridConfig[0].length - 1;
-    gridConfig[rand(0, rows)][rand(0, cols)] = {
+    const upperRows = Math.round((ROWS - 1) / 2);
+    gridConfig[rand(0, upperRows)][rand(0, COLS - 1)] = {
       ...BASE_ENEMY_TILE
     };
-    gridConfig[rand(0, rows)][rand(0, cols)] = {
+
+    gridConfig[rand(upperRows, ROWS)][rand(0, COLS)] = {
       ...BASE_PLAYER_TILE
     };
     this.setState({ gridConfig });
@@ -86,13 +81,11 @@ class App extends Component {
   }
 
   enemyMove(gridConfig) {
-    const rows = gridConfig.length - 1;
-    const cols = gridConfig[0].length - 1;
     // moving randomly (cant be bothered of doing it yet)
     return this.clickBox(
       gridConfig,
-      rand(0, rows),
-      rand(0, cols),
+      rand(0, ROWS),
+      rand(0, COLS),
       ENEMY
     );
   }
@@ -137,8 +130,6 @@ class App extends Component {
 
   render() {
     const { gridConfig, round, tileCount, gameOver } = this.state;
-    const rows = gridConfig.length;
-    const cols = gridConfig[0].length;
     return (
       <div className="App">
         <h2>Rounds: {round}</h2>
@@ -147,7 +138,7 @@ class App extends Component {
           <Overlay message={gameOver.winner} />
         }
         <div className="gridContainer">
-          <Grid cols={cols} rows={rows}
+          <Grid cols={COLS} rows={ROWS}
             gridConfig={gridConfig}
             onBoxClick={(r, c) => this.onBoxClick(r, c)}
           />
